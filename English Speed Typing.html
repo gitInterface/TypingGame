@@ -1,0 +1,768 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>英打練習</title>
+    <link rel="Shortcut Icon" type="image/x-icon" href="favicon-timeclock.ico" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            font-family: 微軟正黑體;
+            cursor: default;
+            overflow: hidden;
+        }
+
+        div{
+            height: 100%;
+        }
+
+        h1 {
+            font-weight: bold;
+            text-align: center;
+            color: white;
+        }
+
+        h2 {
+            font-weight: bold;
+            text-align: center;
+            color: white;
+        }
+
+        h5 {
+            font-weight: bold;
+            text-align: center;
+            color: #7c78ff;
+        }
+
+        button {
+            background-color: #f2f2f2;
+            border: 6px solid red;
+            border-radius: 50%;
+            padding: 20px;
+            margin-bottom: 0px;
+            text-align: center;
+            vertical-align: middle;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            outline: none;
+        }
+
+        span {
+            opacity: 0.5;
+        }
+
+        #game {
+            display: none;
+        }
+
+        .letter {
+            display: none;
+            position: absolute;
+            top: -14%;
+            animation-name:drop;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+        @keyframes drop {
+            from {
+                top: -14%;
+            }
+
+            to {
+                top: 92%;
+            }
+        }
+
+        #result {
+            display: none;
+        }
+
+        .title {
+            display: none;
+        }
+
+        .result {
+            display: none;
+            position: absolute;
+            text-align: initial !important;
+            animation-name: slideIn;
+            animation-fill-mode: forwards;
+            animation-timing-function: ease-in-out;
+            animation-duration: 0.6s;
+        }
+
+        @keyframes slideIn {
+            from {
+                left: -12%;
+            }
+
+            to {
+                left: 34%;
+            }
+        }
+    </style>
+    <script>
+        var time = 200;
+        var timeCopy = 200;
+        var tick;
+        var timer_is_on = 0;
+        var speed = 16;
+        var level = 2;
+
+        var score = 0;
+        var error = "___";
+        var miss = "___";
+
+        var letters = [];
+        for (var i = 97; i < 123; i++) {
+            letters.push(String.fromCharCode(i));
+        }
+
+        function timedCount() {
+            if (time == 0) {
+                stopCount();
+                return;
+            }
+            $("#clock").html("&nbsp;" + time);
+            $("#score").text(score);
+            $("#error").text(error);
+            $("#miss").text(miss);
+            time = time - 1;
+            tick = setTimeout(timedCount, 1000);
+        }
+
+        function startCount() {
+            if (!timer_is_on) {
+                timer_is_on = 1;
+                timedCount();
+            }
+        }
+
+        function stopCount() {
+            clearTimeout(tick);
+            for (var i = 0; i < 6; i++) {
+                clearInterval(channel[i]);
+            }
+            $(document).off("keypress");
+            $(".letter").css("animation-name", "none");
+            timer_is_on = 0;
+            $("#game").css("display", "none");
+            setResult();
+        }
+
+        function getLetter() {
+            return letters[Math.round(Math.random() * 25)];
+        }
+
+        /*function setChannel() {
+            switch (level) {
+                case 2: {
+                    $(".s1").css("display", "none");
+                    $(".s2").css("display", "none");
+                    $(".s4").css("display", "none");
+                    $(".s6").css("display", "none");
+                    break;
+                }
+                case 4: {
+                    $(".s1").css("display", "none");
+                    $(".s6").css("display", "none");
+                    break;
+                }
+            }
+        }*/
+
+        function setLetter() {
+            if (speed == 16) {
+                switch (level) {
+                    case 2: {
+                        $(".s3").show();
+                        setLetterTime(".s3");
+                        $(".s5").delay(1000).show(0);
+                        setTimeout(function () { setLetterTime(".s5"); }, 1000);
+                        break;
+                    }
+                    case 4: {
+                        $(".s2").show();
+                        setLetterTime(".s2");
+                        $(".s3").delay(1000).show(0);
+                        setTimeout(function () { setLetterTime(".s3"); }, 1000);
+                        $(".s4").delay(2000).show(0);
+                        setTimeout(function () { setLetterTime(".s4"); }, 2000);
+                        $(".s5").delay(3000).show(0);
+                        setTimeout(function () { setLetterTime(".s5"); }, 3000);
+                        break;
+                    }
+                    case 6: {
+                        $(".s1").show();
+                        setLetterTime(".s1");
+                        $(".s2").delay(1000).show(0);
+                        setTimeout(function () { setLetterTime(".s2"); }, 1000);
+                        $(".s3").delay(2000).show(0);
+                        setTimeout(function () { setLetterTime(".s3"); }, 2000);
+                        $(".s4").delay(3000).show(0);
+                        setTimeout(function () { setLetterTime(".s4"); }, 3000);
+                        $(".s5").delay(4000).show(0);
+                        setTimeout(function () { setLetterTime(".s5"); }, 4000);
+                        $(".s6").delay(5000).show(0);
+                        setTimeout(function () { setLetterTime(".s6"); }, 5000);
+                        break;
+                    }
+                }
+            }
+            else if (speed == 8) {
+                switch (level) {
+                    case 2: {
+                        $(".s3").show();
+                        setLetterTime(".s3");
+                        $(".s5").delay(500).show(0);
+                        setTimeout(function () { setLetterTime(".s5"); }, 500);
+                        break;
+                    }
+                    case 4: {
+                        $(".s2").show();
+                        setLetterTime(".s2");
+                        $(".s3").delay(500).show(0);
+                        setTimeout(function () { setLetterTime(".s3"); }, 500);
+                        $(".s4").delay(1000).show(0);
+                        setTimeout(function () { setLetterTime(".s4"); }, 1000);
+                        $(".s5").delay(1500).show(0);
+                        setTimeout(function () { setLetterTime(".s5"); }, 1500);
+                        break;
+                    }
+                    case 6: {
+                        $(".s1").show();
+                        setLetterTime(".s1");
+                        $(".s2").delay(500).show(0);
+                        setTimeout(function () { setLetterTime(".s2"); }, 500);
+                        $(".s3").delay(1000).show(0);
+                        setTimeout(function () { setLetterTime(".s3"); }, 1000);
+                        $(".s4").delay(1500).show(0);
+                        setTimeout(function () { setLetterTime(".s4"); }, 1500);
+                        $(".s5").delay(2000).show(0);
+                        setTimeout(function () { setLetterTime(".s5"); }, 2000);
+                        $(".s6").delay(2500).show(0);
+                        setTimeout(function () { setLetterTime(".s6"); }, 2500);
+                        break;
+                    }
+                }
+            }
+            else  {
+                switch (level) {
+                    case 2: {
+                        $(".s3").show();
+                        setLetterTime(".s3");
+                        $(".s5").delay(100).show(0);
+                        setTimeout(function () { setLetterTime(".s5"); }, 100);
+                        break;
+                    }
+                    case 4: {
+                        $(".s2").show();
+                        setLetterTime(".s2");
+                        $(".s3").delay(100).show(0);
+                        setTimeout(function () { setLetterTime(".s3"); }, 100);
+                        $(".s4").delay(150).show(0);
+                        setTimeout(function () { setLetterTime(".s4"); }, 150);
+                        $(".s5").delay(200).show(0);
+                        setTimeout(function () { setLetterTime(".s5"); }, 200);
+                        break;
+                    }
+                    case 6: {
+                        $(".s1").show();
+                        setLetterTime(".s1");
+                        $(".s2").delay(100).show(0);
+                        setTimeout(function () { setLetterTime(".s2"); }, 100);
+                        $(".s3").delay(150).show(0);
+                        setTimeout(function () { setLetterTime(".s3"); }, 150);
+                        $(".s4").delay(200).show(0);
+                        setTimeout(function () { setLetterTime(".s4"); }, 200);
+                        $(".s5").delay(250).show(0);
+                        setTimeout(function () { setLetterTime(".s5"); }, 250);
+                        $(".s6").delay(300).show(0);
+                        setTimeout(function () { setLetterTime(".s6"); }, 300);
+                        break;
+                    }
+                }
+            }
+        }
+        var channel = ["", "", "", "", "", ""];
+        function setLetterTime(element) {
+            $(element).text(getLetter());
+            switch (element.charAt(2)) {
+                case "2": {
+                    channel[1] = setInterval(function () {
+                        $("#score").text(score -= 50);
+                        if (miss == "___") miss = 0;
+                        $("#miss").text(++miss);
+                        $(element).text(getLetter());
+                    }, speed * 1000);
+                    break;
+                }
+                case "3": {
+                    channel[2] = setInterval(function () {
+                        $("#score").text(score -= 50);
+                        if (miss == "___") miss = 0;
+                        $("#miss").text(++miss);
+                        $(element).text(getLetter());
+                    }, speed * 1000);
+                    break;
+                }
+                case "4": {
+                    channel[3] = setInterval(function () {
+                        $("#score").text(score -= 50);
+                        if (miss == "___") miss = 0;
+                        $("#miss").text(++miss);
+                        $(element).text(getLetter());
+                    }, speed * 1000);
+                    break;
+                }
+                case "5": {
+                    channel[4] = setInterval(function () {
+                        $("#score").text(score -= 50);
+                        if (miss == "___") miss = 0;
+                        $("#miss").text(++miss);
+                        $(element).text(getLetter());
+                    }, speed * 1000);
+                    break;
+                }
+                case "6": {
+                    channel[5] = setInterval(function () {
+                        $("#score").text(score -= 50);
+                        if (miss == "___") miss = 0;
+                        $("#miss").text(++miss);
+                        $(element).text(getLetter());
+                    }, speed * 1000);
+                    break;
+                }
+                default: {
+                    channel[0] = setInterval(function () {
+                        $("#score").text(score -= 50);
+                        if (miss == "___") miss = 0;
+                        $("#miss").text(++miss);
+                        $(element).text(getLetter());
+                    }, speed * 1000);
+                    break;
+                }
+            }
+        }
+
+        function setResult() {
+            $("#result").css("display", "block");
+            $(".score").append(score);
+            if (error == "___") error = 0;
+            switch (error.toString().length) {
+                case 1: {
+                    $(".error").append("&ensp;&ensp;&ensp;" + error + " 次");
+                    break;
+                }
+                case 2: {
+                    $(".error").append("&ensp;&ensp;" + error + " 次");
+                    break;
+                }
+                case 3: {
+                    $(".error").append("&ensp;" + error + " 次");
+                    break;
+                }
+                case 4: {
+                    $(".error").append(error + " 次");
+                    break;
+                }
+            }
+            if (miss == "___") miss = 0;
+            switch (miss.toString().length) {
+                case 1: {
+                    $(".miss").append("&ensp;&ensp;&ensp;" + miss + " 次");
+                    break;
+                }
+                case 2: {
+                    $(".miss").append("&ensp;&ensp;" + miss + " 次");
+                    break;
+                }
+                case 3: {
+                    $(".miss").append("&ensp;" + miss + " 次");
+                    break;
+                }
+            }
+            $(".title").fadeIn(2000);
+            $(".score").delay(1000).show(0);
+            $(".error").delay(1600).show(0);
+            $(".miss").delay(2200).show(0);
+            $(".appraisal").delay(2800).show(0);
+            if (timeCopy == 200) {
+                if (level == 6) {
+                    if (speed == 4) {
+                        if (score <= 0) {
+                            var line = ["堅持下去，這是必經之路", "降速度或等級把，穩扎穩打", "再來過，把持住別氣餒"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else if (score < 30000) {
+                            var line = ["抓到訣竅惹，路還遠著", "看到一點曙光，乘上去", "門稍微開了，但別得意"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else if (score < 100000) {
+                            var line = ["很厲害，不過還可更快", "實力堅強，但還不再榜上", "在進一步你就是大師級惹"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else {
+                            setTimeout(function () { $(".comment").append("恭喜畢業，允通往地獄級").hide().fadeIn(900); }, 3700);
+                        }
+                    }
+                    else if (speed == 8) {
+                        if (score <= 0) {
+                            var line = ["真不行就稍微看下鍵盤", "看起來很吃力，退一級把", "累了嗎，眼睛休息一下"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else if (score < 45000) {
+                            var line = ["還行，但別偷看鍵盤喔", "感覺來惹，還不趁熱來過", "加把勁，有進步了"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else if (score < 100000) {
+                            var line = ["不錯嘛，有在用功喔", "有實力，光芒還可磨練", "看來原石已經磨成晶鑽"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else {
+                            setTimeout(function () { $(".comment").append("本關已過，請往上層挑戰").hide().fadeIn(900); }, 3700);
+                        }
+                    }
+                    else {
+                        if (score <= 0) {
+                            var line = ["字數請調降來過", "恍神嗎，再試一次你行", "請戴上眼鏡展現實力"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else if (score < 45000) {
+                            var line = ["還行，但別偷看鍵盤喔", "眼睛!關鍵在感覺鍵盤", "尚可，但還不到過此關呢"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else if (score < 60000) {
+                            var line = ["差一點惹，注意小失誤", "在專心點就可跨越了", "十足成長，但魔鬼在細節"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else {
+                            setTimeout(function () { $(".comment").append("本關已過，請往上層挑戰").hide().fadeIn(900); }, 3700);
+                        }
+                    }
+                }
+                else if (level == 4) {
+                    if (speed == 4) {
+                        if (score <= 0) {
+                            var line = ["速度太快請調降先", "時間長可以培養耐性", "看來一定是眼睛累了"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else if (score < 50000) {
+                            var line = ["進步是好事，要少看鍵盤", "攻頂的關鍵在於手要巧", "別神氣這關還沒過呢"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else if (score < 90000) {
+                            var line = ["掌聲鼓勵，小失誤要注意", "終點線在前面不遠了", "看這手速，給九十一分"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else {
+                            setTimeout(function () { $(".comment").append("本關已過，請往上層挑戰").hide().fadeIn(900); }, 3700);
+                        }
+                    }
+                    else if (speed == 8) {
+                        if (score <= 0) {
+                            var line = ["確定是在認真打字嗎?", "以為是在打地鼠嗎XD", "要不洗洗睡，還做別的事"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else if (score < 35000) {
+                            var line = ["很棒，看在有得分的份上", "白色的明天依舊在沉睡著", "終於按得比狗好，恭喜"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else if (score < 45000) {
+                            var line = ["讚賞是要頒給過關的人", "這分數...九十五分", "行兄弟，還有一階沒爬"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else {
+                            setTimeout(function () { $(".comment").append("本關已過，請往上層挑戰").hide().fadeIn(900); }, 3700);
+                        }
+                    }
+                    else {
+                        if (score <= 0) {
+                            var line = ["要不休息算了?認真點", "指日無期是最好的結尾", "一心二用是做不成事的"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else if (score < 36000) {
+                            var line = ["別疏忽，還沒過本關呢", "一步之遙，推自己一把", "出口在眼前惹，專注!"];
+                            setTimeout(function () { $(".comment").append(line[Math.round(Math.random() * 2)]).hide().fadeIn(900); }, 3700);
+                        }
+                        else {
+                            setTimeout(function () { $(".comment").append("本關已過，請往上層挑戰").hide().fadeIn(900); }, 3700);
+                        }
+                    }
+                }
+                else {
+                    if (speed == 4) {
+
+                    }
+                    else if (speed == 8) {
+
+                    }
+                    else {
+
+                    }
+                }
+            }
+            else if (timeCopy == 100) {
+                if (level == 6) {
+
+                }
+                else if (level == 4) {
+
+                }
+                else {
+
+                }
+            }
+            else {
+                if (level == 6) {
+                    setTimeout(function () { $(".comment").append("你別開玩笑，認真點").hide().fadeIn(900); }, 3700);  
+                }
+                else if (level == 4) {
+
+                }
+                else {
+
+                }
+            }
+
+        }
+
+        $(document).ready(function () {
+
+            $(".time-200").click(function () {
+                $(this).siblings("button").css("background-color", "#f2f2f2");
+                $(this).parent().children("span").css("opacity", "0.5");
+                $(this).css("background-color", "#ffff66");
+                $("#time200").css("opacity", "1");
+                time = 200;
+            })
+            $(".time-100").click(function () {
+                $(this).siblings("button").css("background-color", "#f2f2f2");
+                $(this).parent().children("span").css("opacity", "0.5");
+                $(this).css("background-color", "#ffff66");
+                $("#time100").css("opacity", "1");
+                time = 100;
+            })
+            $(".time-50").click(function () {
+                $(this).siblings("button").css("background-color", "#f2f2f2");
+                $(this).parent().children("span").css("opacity", "0.5");
+                $(this).css("background-color", "#ffff66");
+                $("#time50").css("opacity", "1");
+                time = 50;
+            })
+
+            $(".speed-slow").click(function () {
+                $(this).siblings("button").css("background-color", "#f2f2f2");
+                $(this).parent().children("span").css("opacity", "0.5");
+                $(this).css("background-color", "#ffff66");
+                $("#speedSlow").css("opacity", "1");
+                speed = 16;
+            })
+            $(".speed-normal").click(function () {
+                $(this).siblings("button").css("background-color", "#f2f2f2");
+                $(this).parent().children("span").css("opacity", "0.5");
+                $(this).css("background-color", "#ffff66");
+                $("#speedNormal").css("opacity", "1");
+                speed = 8;
+            })
+            $(".speed-fast").click(function () {
+                $(this).siblings("button").css("background-color", "#f2f2f2");
+                $(this).parent().children("span").css("opacity", "0.5");
+                $(this).css("background-color", "#ffff66");
+                $("#speedFast").css("opacity", "1");
+                speed = 4;
+            })
+
+            $(".easy").click(function () {
+                $(this).siblings("button").css("background-color", "#f2f2f2");
+                $(this).parent().children("span").css("opacity", "0.5");
+                $(this).css("background-color", "#ffff66");
+                $("#easy").css("opacity", "1");
+                level = 2;
+            })
+            $(".medium").click(function () {
+                $(this).siblings("button").css("background-color", "#f2f2f2");
+                $(this).parent().children("span").css("opacity", "0.5");
+                $(this).css("background-color", "#ffff66");
+                $("#medium").css("opacity", "1");
+                level = 4;
+            })
+            $(".advanced").click(function () {
+                $(this).siblings("button").css("background-color", "#f2f2f2");
+                $(this).parent().children("span").css("opacity", "0.5");
+                $(this).css("background-color", "#ffff66");
+                $("#advanced").css("opacity", "1");
+                level = 6;
+            })
+
+            $("#start").hover(function () {
+                $(this).css("background-color", "white");
+            }, function () {
+                $(this).css("background-color", "#f2f2f2");
+            })
+
+            $("#start").click(function () {
+                document.getElementById("clock").value = time;
+                $("#menu").css("display", "none");
+                $("#game").css("display", "block");
+                $(".letter").css("animation-duration", speed + "s");
+                timeCopy = time;
+                startCount();
+                //setChannel();
+                setLetter();
+                findKeypress();
+            })
+
+            /*if ($(".letter").offset.top == $(window).height() * 0.96) {
+                $(this).css("animation-delay", "0s");
+                $(this).removeClass("letter");
+                window.setTimeout(function () {
+                    $(this).addClass("letter");
+                }, 0);
+                var i = $(this).attr("class").charAt(8);
+                clearInterval(channel[i - 1]);
+                channel[i - 1] = setInterval(function () { $(this).text(getLetter()) }, speed * 1000);
+                $(this).text(getLetter());
+            }*/
+            function findKeypress() {
+                $(window).keydown(function (event) {
+                    var key = String.fromCharCode(event.which).toLowerCase();
+                    var match;
+                    var max = 0;
+                    for (var i = 1; i <= 6; i++) {
+                        if (key == $(".s" + i).text()) {
+                            if ($(".s" + i).offset().top > max) {
+                                match = i;
+                                max = $(".s" + i).offset().top;
+                            }
+                        }
+                        if (i == 6 && max != 0) {
+                            $("#score").text(score += 200);
+                            //重點區
+                            $(".s" + match).removeClass("letter");
+                            window.setTimeout(function () {
+                                $(".s" + match).addClass("letter");
+                            }, 0);
+                            clearInterval(channel[match - 1]);
+                            channel[match - 1] = setInterval(function () {
+                                $("#score").text(score -= 50);
+                                if (miss == "___") miss = 0;
+                                $("#miss").text(++miss);
+                                $(".s" + match).text(getLetter());
+                            }, speed * 1000);
+                            $(".s" + match).text(getLetter());
+                            break;
+                        }
+                        if (i == 6) {
+                            $("#score").text(score -= 50);
+                            if (error == "___") error = 0;
+                            $("#error").text(++error);
+                            break;
+                        }
+                    }
+                });
+            }
+        })
+
+    </script>
+</head>
+<body onselectstart="return false" ondragstart="return false" oncontextmenu="return false" style="height:100%">
+    <div class="container">
+        <div id="menu" class="col-xs-12 col-sm-12" style="background-color: #404040">
+            <h1 style="font-size:45px">英打練習</h1>
+            <h5 style="z-index:1">設計者:英打肥肥</h5>
+            <h5 style="z-index:1; color: white;">請縮放螢幕至90%</h5>
+            <br />
+            <br />
+            <h1>英文字母會一直掉下來&nbsp;!</h1>
+            <h1>字打對了加200分</h1>
+            <h1>字打錯了扣50分</h1>
+            <h1>字落到地面也必須扣50分&nbsp;!</h1>
+
+            <div style="display:inline-block;margin-left:15%">
+                <h2>
+                    時間選擇&nbsp;&nbsp;&nbsp;&nbsp;
+                    <button class="time-200" style="background-color:#ffff66"></button>&nbsp;&nbsp;
+                    <span id="time200" style="opacity:1">200</span>&nbsp;&nbsp;
+                    <button class="time-100"></button>&nbsp;&nbsp;
+                    <span id="time100">100</span>&nbsp;&nbsp;
+                    <button class="time-50"></button>&nbsp;&nbsp;
+                    <span id="time50">50</span>&nbsp;
+                </h2>
+                <h2>
+                    速度選擇&nbsp;&nbsp;&nbsp;&nbsp;
+                    <button class="speed-slow" style="background-color:#ffff66"></button>&nbsp;
+                    <span id="speedSlow" style="opacity:1">慢速</span>&nbsp;&nbsp;
+                    <button class="speed-normal"></button>&nbsp;
+                    <span id="speedNormal">普通</span>&nbsp;&nbsp;
+                    <button class="speed-fast"></button>&nbsp;
+                    <span id="speedFast">快速</span>
+                </h2>
+                <h2>
+                    等級選擇&nbsp;&nbsp;&nbsp;&nbsp;
+                    <button class="easy" style="background-color:#ffff66"></button>&nbsp;
+                    <span id="easy" style="opacity:1">初級</span>&nbsp;&nbsp;
+                    <button class="medium"></button>&nbsp;
+                    <span id="medium">中級</span>&nbsp;&nbsp;
+                    <button class="advanced"></button>&nbsp;
+                    <span id="advanced">高級</span>
+                </h2>
+                <br />
+                <br />
+            </div>
+            <button id="start" style="float:right;background-color:#f2f2f2;margin-right:12%;margin-top:3%;border-color:#800000;border-radius:50%;border-width:10px;box-shadow: 2px 6px #4d0000;padding:25px 6px;font-size:50px">Start</button>
+        </div>
+        <div id="game" class="col-xs-12 col-sm-12" style="background-color: #404040">
+            <div style="float:left;margin-top:15px;margin-left:3%">
+                <span class="glyphicon glyphicon-time" style="float:left;color:white;font-size:50px;opacity:1"></span>
+                <h1 id="clock" style="float:left;margin-top:3px"></h1>
+            </div>
+            <div style="float:right;height:10%;width:230px">
+                <div style="margin-right:15px">
+                    <h2 style="float:left">得分</h2>
+                    <h2 id="score" style="float:right"></h2>
+                </div>
+                <div style="margin-right:15px;margin-top:10px">
+                    <h2 style="float:left">失誤</h2>
+                    <h2 id="error" style="float:right"></h2>
+                </div>
+                <div style="margin-right:15px;margin-top:10px">
+                    <h2 style="float:left">落地</h2>
+                    <h2 id="miss" style="float:right"></h2>
+                </div>
+            </div>
+            <h1 class="letter s1" style="float:left;margin-left:22%;font-size:50px"></h1>
+            <h1 class="letter s2" style="float:left;margin-left:32%;font-size:50px"></h1>
+            <h1 class="letter s3" style="float:left;margin-left:41%;font-size:50px"></h1>
+            <h1 class="letter s4" style="float:left;margin-left:50%;font-size:50px"></h1>
+            <h1 class="letter s5" style="float:left;margin-left:60%;font-size:50px"></h1>
+            <h1 class="letter s6" style="float:left;margin-left:69%;font-size:50px"></h1>
+        </div>
+        <div id="result" class="col-xs-12 col-sm-12" style="background-color: #404040">
+            <h1 class="title" style="font-size:45px"><span class="glyphicon glyphicon-user"></span>&nbsp;成績公布</h1>
+            <br />
+            <br />
+            <div>
+                <h2 class="result score">得分:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</h2>
+                <br />
+                <br />
+                <br />
+                <h2 class="result error">失誤:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;</h2>
+                <br />
+                <br />
+                <br />
+                <h2 class="result miss">落地:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;</h2>
+                <br />
+                <br />
+                <br />
+                <h2 class="result appraisal">評語:&nbsp;<strong class="comment"></strong></h2>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
